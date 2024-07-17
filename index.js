@@ -4,6 +4,7 @@ const methodDeclarationRegex = /(?<!\s\*\s)(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)
 const returnTypeRegex = /(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)/;
 const argumentsRegex = /\s?\(((?:\w|\s|\*|\<|\>|\^|\(|\))*)\)\s*((?:\w)*)\s?/g;
 const commentRegex = /(?:^|\s)\/\/(.+?)$|\/\*(.*?)\*\//gms;
+const propertyDeclarationRegex = /(?:@property)\s?\(([\w,\s]+)\)\s?([\w\d\<\>\*]+)\s*\*?\s*([\w\d]+);/g;
 
 // Get Groups for matches
 function getNthGroupForMatch(string, regex, index) {
@@ -134,10 +135,36 @@ const parseMethods = file => {
 	});
 };
 
+const parseProperties = file => {
+  const propertyDeclarations = file.match(propertyDeclarationRegex) || [];
+	
+	return propertyDeclarations.map(propertyDeclaration => {
+		const regex = new RegExp(propertyDeclarationRegex);
+		const matches = regex.exec(propertyDeclaration);
+
+		if (!matches) {
+			return null;
+		}
+		const [_full, commaSeparatedAttributes, type, name] = matches;
+		const attributes = commaSeparatedAttributes
+			.split(",")
+			.map(attribute => attribute.trim());
+
+		return {
+			name, 
+			type, 
+			attributes
+		};
+	})
+	.filter(declaration => !!declaration);
+}
+
 const parse = file => {
+	const fileWithoutComments = file.replace(/\/\*[^]*?\*\//g, "");
 	return {
 		name: parseClassName(file),
-		methods: parseMethods(file)
+		methods: parseMethods(file),
+		properties: parseProperties(fileWithoutComments),
 	};
 };
 
