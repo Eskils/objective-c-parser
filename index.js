@@ -4,7 +4,7 @@ const methodDeclarationRegex = /(?<!\s\*\s)(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)
 const returnTypeRegex = /(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)/;
 const argumentsRegex = /\s?\(((?:\w|\s|\*|\<|\>|\^|\(|\))*)\)\s*((?:\w)*)\s?/g;
 const commentRegex = /(?:^|\s)\/\/(.+?)$|\/\*(.*?)\*\//gms;
-const propertyDeclarationRegex = /(?:@property)\s?\(([\w,\s]+)\)\s?([\w\d\<\>\*]+)\s*\*?\s*([\w\d]+);/g;
+const propertyDeclarationRegex = /(?:@property)\s?\(([\w,\s]+)\)\s?([\w\d]+(?:\<[\w\d]+\s*\*?\>)?)\s*\*?\s*([\w\d]+);/g;
 
 // Get Groups for matches
 function getNthGroupForMatch(string, regex, index) {
