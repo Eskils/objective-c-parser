@@ -104,14 +104,15 @@ const parseMethods = file => {
 			return firstMethodLine === line.replace(/^\s+/g, "");
 		});
 
-		const isSingleLineComment = lines[lineIndex - 1].indexOf("//") !== -1;
+		const previousLine = lines[lineIndex - 1] ?? "";
+		const isSingleLineComment = previousLine.indexOf("//") !== -1;
 		const isSingleLineCommentInMultiLineCommentFormat =
-			lines[lineIndex - 1].indexOf("/**") !== -1 &&
-			lines[lineIndex - 1].lastIndexOf("*/") !== -1;
+			previousLine.indexOf("/**") !== -1 &&
+			previousLine.lastIndexOf("*/") !== -1;
 		const comment = isSingleLineComment
-			? lines[lineIndex - 1].replace(/\/\/(?:\s)*/, "")
+			? previousLine.replace(/\/\/(?:\s)*/, "")
 			: isSingleLineCommentInMultiLineCommentFormat
-			? lines[lineIndex - 1]
+			? previousLine
 					.replace(/\/\*\*(?:\s)*/, "")
 					.replace(/(?:\s)*\*+\//, "")
 			: extractMultiLineComment(lineIndex, lines);
