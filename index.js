@@ -1,5 +1,6 @@
 "use strict";
 
+const interfaceDeclarationRegex = /@interface ([\w\d]+)\s?:\s?([\w\d]+)\s?(?:<((?:[\w]+(?:,\s)?)+)>)?/g;
 const methodDeclarationRegex = /(?<!\s\*\s)(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)(?:\w|\s|\<|\>|\:|\(|\)|\*|\_|\-|\"|\[|\]|\^)*(__attribute__\(.*\))?(;|{)/g;
 const returnTypeRegex = /(?:\+|\-)\s?\(((?:\s|\w|\<|\>|\*)*)\)/;
 const argumentsRegex = /\s?\(((?:\w|\s|\*|\<|\>|\^|\(|\))*)\)\s*((?:\w)*)\s?/g;
@@ -16,10 +17,20 @@ function getNthGroupForMatch(string, regex, index) {
 	return matches;
 }
 
-const parseClassName = file => {
-	const nameRegex = /@interface \w*/i;
-	const nameRegexLength = 11;
-	return (file.match(nameRegex) || [""])[0].substr(nameRegexLength);
+const parseInterfaceDeclaration = file => {
+	const regex = new RegExp(interfaceDeclarationRegex);
+	const matches = regex.exec(file);
+	const [_interface, name, superclass, comaSeparatedProtocols] = matches;
+	
+	const protocols = (comaSeparatedProtocols ?? '')
+			.split(",")
+			.map(protocol => protocol.trim());
+
+	return {
+		name,
+		superclass,
+		protocols,
+	};
 };
 
 const extractMultiLineComment = (lineIndex, lines) => {
@@ -162,8 +173,11 @@ const parseProperties = file => {
 
 const parse = file => {
 	const fileWithoutComments = file.replace(/\/\*[^]*?\*\//g, "");
+	const { name, superclass, protocols } = parseInterfaceDeclaration(file);
 	return {
-		name: parseClassName(file),
+		name,
+		superclass,
+		protocols,
 		methods: parseMethods(file),
 		properties: parseProperties(fileWithoutComments),
 	};
