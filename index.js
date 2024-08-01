@@ -17,9 +17,23 @@ function getNthGroupForMatch(string, regex, index) {
 	return matches;
 }
 
+const parseClassName = file => {
+	const nameRegex = /@interface \w*/i;
+	const nameRegexLength = 11;
+	return (file.match(nameRegex) || [""])[0].substr(nameRegexLength);
+};
+
 const parseInterfaceDeclaration = file => {
 	const regex = new RegExp(interfaceDeclarationRegex);
 	const matches = regex.exec(file);
+	
+	if (!matches) {
+		const name = parseClassName(file);
+		return {
+			name
+		};
+	}
+
 	const [_interface, name, superclass, comaSeparatedProtocols] = matches;
 	
 	const protocols = (comaSeparatedProtocols ?? '')
